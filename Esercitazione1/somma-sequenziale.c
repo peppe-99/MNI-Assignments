@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     tempo_speso = (double)(fine - inizio) / CLOCKS_PER_SEC;    
     
     printf("Somma: %f\n", somma);
-    printf("Tempo: %fs per %d numeri reali\n", tempo_speso, n);
+    printf("Tempo: %f sec per %d numeri reali\n", tempo_speso, n);
 
     return 0;
 }
