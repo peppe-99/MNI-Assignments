@@ -5,8 +5,8 @@
 int main(int argc, char *argv[]) {
     
     int n;
-    double tempo_speso, somma = 0.0;
-    double* elementi;
+    float tempo_speso, somma = 0.0;
+    float* elementi;
 
 
     /* Input: numero degli elementi da sommare */
@@ -14,12 +14,12 @@ int main(int argc, char *argv[]) {
     scanf("%d", &n);
  
     /* Allochiamo memoria per il vettore degli elementi da sommare */
-    elementi = (double*) malloc(sizeof(double) * n);
+    elementi = (float*) malloc(sizeof(float) * n);
 
     /* Inizializzazione del vettore con numeri reali pseudocasuali wsull'intervallo (-5, +5) */
     srand(time(NULL));
     for (int i = 0; i < n; i++) {
-        elementi[i] =  ((double)rand() * 10 / (double)RAND_MAX) - 5;
+        elementi[i] =  ((float)rand() * 10 / (float)RAND_MAX) - 5;
     }
 
     /* Calcolo tempo d'inizio */
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
     clock_t fine = clock();
 
     /* Calcolo del tempo impiegato */
-    tempo_speso = (double)(fine - inizio) / CLOCKS_PER_SEC;    
+    tempo_speso = (float)(fine - inizio) / CLOCKS_PER_SEC;    
     
     printf("Somma: %f\n", somma);
     printf("Tempo: %f sec per %d numeri reali\n", tempo_speso, n);

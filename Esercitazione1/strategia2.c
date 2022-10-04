@@ -8,8 +8,8 @@ int main(int argc, char **argv) {
     int np, rank;
     int dim, dim_locale, passi=0, p;
     int *displs, *send_counts, *potenze;
-    double *elementi, *elementi_locali;
-    double somma=0.0, somma_locale=0.0, oracolo=0.0, somma_parziale;
+    float *elementi, *elementi_locali;
+    float somma=0.0, somma_locale=0.0, oracolo=0.0, somma_parziale;
     double inizio, fine_locale, fine;
 
     /* Inizializzazione ambiente MPI */
@@ -26,13 +26,13 @@ int main(int argc, char **argv) {
 
         /* Inizializzazione del vettore con reali pseudocasuali nell'intervallo (-5,+5) */
         /* Viene calcolato anche un oracolo per controllare la correttezza della somma parallela */
-        elementi = (double*)malloc(dim * sizeof(double));
+        elementi = (float*)malloc(dim * sizeof(float));
         srand((unsigned int) time(0)); 
         for (int i = 0; i < dim; i++) {
-            elementi[i] =  ((double)rand() * 10 / (double)RAND_MAX) - 5;
-            //oracolo += elementi[i];
+            elementi[i] =  ((float)rand() * 10 / (float)RAND_MAX) - 5;
+            oracolo += elementi[i];
         }
-        //printf("\nOracolo: %f\n", oracolo);
+        printf("\nOracolo: %f\n", oracolo);
     }
 
     /* Invio in brodcast del numero di elementi da sommare */
@@ -48,9 +48,9 @@ int main(int argc, char **argv) {
     }
     dim_locale = send_counts[rank];
 
-    elementi_locali = (double*)malloc(dim_locale * sizeof(double));
+    elementi_locali = (float*)malloc(dim_locale * sizeof(float));
 
-    MPI_Scatterv(elementi, send_counts, displs, MPI_DOUBLE, elementi_locali, dim_locale, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Scatterv(elementi, send_counts, displs, MPI_FLOAT, elementi_locali, dim_locale, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
     /* Sincronizzazione dei processori e calcolo tempo di inizio */
     MPI_Barrier(MPI_COMM_WORLD);
@@ -67,20 +67,17 @@ int main(int argc, char **argv) {
 		potenze[i] = p<<i;
 	}
     /* calcolo delle somme parziali e combinazioen dei risultati parziali */
+    for (int i = 0; i < dim_locale; i++) {
+            somma_locale += elementi_locali[i];
+    }
     for (int k = 0; k < passi; k++) {
-        /* ogni processore calcola la prima somma parziale */
-        if (k==0) {
-            for (int i = 0; i < dim_locale; i++) {
-                somma_locale += elementi_locali[i];
-            }
-        }
         /* se rank % 2^{k+1} == 2^k allora P_rank invia al processore con id = rank - 2^k */
         if ((rank % potenze[k+1]) == potenze[k]) {
-            MPI_Send(&somma_locale, 1, MPI_DOUBLE, rank-potenze[k], rank-potenze[k], MPI_COMM_WORLD);
+            MPI_Send(&somma_locale, 1, MPI_FLOAT, rank-potenze[k], rank-potenze[k], MPI_COMM_WORLD);
         }
         /* altrimetni, se rank % 2^{k+1} == 0 allora P_rank riceve dal processore con id = rank + 2^k */
         else if ((rank % potenze[k+1]) == 0) {
-            MPI_Recv(&somma_parziale, 1, MPI_DOUBLE, rank+potenze[k], rank, MPI_COMM_WORLD, NULL);
+            MPI_Recv(&somma_parziale, 1, MPI_FLOAT, rank+potenze[k], rank, MPI_COMM_WORLD, NULL);
             somma_locale+=somma_parziale;
         }
         // altrimenti, il processore ha completato il suo lavoro nel precedente passo temporale

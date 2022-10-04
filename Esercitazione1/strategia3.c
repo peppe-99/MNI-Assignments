@@ -9,8 +9,8 @@ int main(int argc, char **argv) {
     int np, rank;
     int dim, dim_locale, passi=0, p, comunicate_with;
     int *displs, *send_counts, *potenze;
-    double *elementi, *elementi_locali;
-    double somma=0.0, somma_locale=0.0, oracolo=0.0, somma_parziale;
+    float *elementi, *elementi_locali;
+    float somma=0.0, somma_locale=0.0, oracolo=0.0, somma_parziale;
     double inizio, fine_locale, fine;
 
     /* Inizializzazione ambiente MPI */
@@ -27,10 +27,10 @@ int main(int argc, char **argv) {
 
         /* Inizializzazione del vettore con reali pseudocasuali nell'intervallo (-5,+5) */
         /* Viene calcolato anche un oracolo per controllare la correttezza della somma parallela */
-        elementi = (double*)malloc(dim * sizeof(double));
+        elementi = (float*)malloc(dim * sizeof(float));
         srand((unsigned int) time(0)); 
         for (int i = 0; i < dim; i++) {
-            elementi[i] =  ((double)rand() * 10 / (double)RAND_MAX) - 5;
+            elementi[i] =  ((float)rand() * 10 / (float)RAND_MAX) - 5;
             oracolo += elementi[i];
         }
         printf("\nOracolo: %f\n", oracolo);
@@ -49,9 +49,9 @@ int main(int argc, char **argv) {
     }
     dim_locale = send_counts[rank];
 
-    elementi_locali = (double*)malloc(dim_locale * sizeof(double));
+    elementi_locali = (float*)malloc(dim_locale * sizeof(float));
 
-    MPI_Scatterv(elementi, send_counts, displs, MPI_DOUBLE, elementi_locali, dim_locale, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Scatterv(elementi, send_counts, displs, MPI_FLOAT, elementi_locali, dim_locale, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
     /* Sincronizzazione dei processori e calcolo tempo di inizio */
     MPI_Barrier(MPI_COMM_WORLD);
@@ -86,8 +86,8 @@ int main(int argc, char **argv) {
         }
 
         /* Scambio ed aggiornamento delle somme parziali */
-        MPI_Send(&somma_locale, 1, MPI_DOUBLE, comunicate_with, comunicate_with, MPI_COMM_WORLD);
-        MPI_Recv(&somma_parziale, 1, MPI_DOUBLE, comunicate_with, rank, MPI_COMM_WORLD, NULL);
+        MPI_Send(&somma_locale, 1, MPI_FLOAT, comunicate_with, comunicate_with, MPI_COMM_WORLD);
+        MPI_Recv(&somma_parziale, 1, MPI_FLOAT, comunicate_with, rank, MPI_COMM_WORLD, NULL);
         somma_locale += somma_parziale;
     }
 
