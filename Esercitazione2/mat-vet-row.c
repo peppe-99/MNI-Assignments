@@ -32,6 +32,8 @@ int main(int argc, char **argv) {
     // Variabili di lavoro
     double *A, *v, *localA,*local_w, *w;
 
+    // Variabili per il tempo di esecuzione	
+    double T_inizio,T_fine,T_max;
 
     /*Attiva MPI*/
     MPI_Init(&argc, &argv);
@@ -43,10 +45,12 @@ int main(int argc, char **argv) {
     // Se sono a radice
     if(me == 0)
     {
-        printf("inserire numero di righe m = \n"); 
+        printf("Inserire numero di righe m = ");
+        fflush(stdout);
         scanf("%d",&m); 
         
-        printf("inserire numero di colonne n = \n"); 
+        printf("Inserire numero di colonne n = ");
+        fflush(stdout);
         scanf("%d",&n);
         // Numero di righe da processare
         local_m = m/nproc;  
@@ -56,15 +60,15 @@ int main(int argc, char **argv) {
         v = malloc(sizeof(double)*n);
         w =  malloc(sizeof(double)*m); 
         
-        printf("v = \n");     
+        //printf("v = \n");     
         for (j=0;j<n;j++)
         {
             v[j]=j; 
-            printf("%f ", v[j]);
+            //printf("%f ", v[j]);
         }
-        printf("\n");
+        //printf("\n");
         
-        printf("A = \n"); 
+        //printf("A = \n"); 
         for (i=0;i<m;i++)
         {
             for(j=0;j<n;j++)
@@ -73,9 +77,9 @@ int main(int argc, char **argv) {
                 A[i*n+j]= 1.0/(i+1)-1;
                 else
                     A[i*n+j]= 1.0/(i+1)-pow(1.0/2.0,j); 
-                printf("%f ", A[i*n+j]);
+                //printf("%f ", A[i*n+j]);
             }
-            printf("\n");
+            //printf("\n");
         }
         
     } // fine me==0
@@ -103,13 +107,19 @@ int main(int argc, char **argv) {
         0, MPI_COMM_WORLD);
 
     // Scriviamo la matrice locale ricevuta
-    printf("localA %d = \n", me); 
-    for(i = 0; i < local_m; i++)
-    {
-        for(j = 0; j < n; j++)
-            printf("%lf\t", localA[i*n+j]);
-        printf("\n");
+    if (m <= 10 && n <= 10) {
+        printf("localA %d = \n", me); 
+        for(i = 0; i < local_m; i++)
+        {
+            for(j = 0; j < n; j++)
+                printf("%lf\t", localA[i*n+j]);
+            printf("\n");
+        }
     }
+
+    /* Calcolo tempo di inizio */
+    MPI_Barrier(MPI_COMM_WORLD);
+	T_inizio=MPI_Wtime();
 
     // Effettuiamo i calcoli
     prod_mat_vett(local_w,localA,local_m,n,v);
@@ -117,13 +127,26 @@ int main(int argc, char **argv) {
     // 0 raccoglie i risultati parziali
     MPI_Gather(&local_w[0],local_m,MPI_DOUBLE,&w[0],local_m,MPI_DOUBLE,0,MPI_COMM_WORLD);
 
+    /* Calcolo tempo di fine */
+    MPI_Barrier(MPI_COMM_WORLD);
+	T_fine=MPI_Wtime()-T_inizio;
+
+    /* Calcolo del tempo totale di esecuzione*/
+	MPI_Reduce(&T_fine,&T_max,1,MPI_DOUBLE,MPI_MAX,0,MPI_COMM_WORLD);
+
     // 0 stampa la soluzione
     if(me==0)
     { 
-        printf("w = \n"); 
-        for(i = 0; i < m; i++)
-            printf("%f ", w[i]);
-        printf("\n");
+        if (m <= 10 & n <= 10) {
+            printf("w = \n"); 
+            for(i = 0; i < m; i++)
+                printf("%f ", w[i]);
+            printf("\n");
+        }
+        printf("\nProcessori: %d\n", nproc);
+        printf("Dimensioni matrice: %dx%d\n", m, n);
+        printf("Lunghezza vettore: %d\n", n);
+        printf("Tempo esecuzione paralleo: %f sec\n", T_max);
     }
 
     MPI_Finalize (); /* Disattiva MPI */
