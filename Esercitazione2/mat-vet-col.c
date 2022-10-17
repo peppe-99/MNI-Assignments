@@ -43,7 +43,6 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
                 matrix[i * col + j] = ((double)rand() * 10 / (double)RAND_MAX) - 5; //reali nell'intervallo (-5,+5)
-                matrix[i*col+j] = (double) i*col+j;
             }   
         }
 
