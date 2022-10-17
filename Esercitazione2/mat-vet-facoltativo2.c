@@ -1,8 +1,3 @@
-/**
- *  Algoritmo parallelo per il prodotto matrice-vettore
- *  strategia: blocchi di colonne
-*/
-
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
@@ -11,17 +6,18 @@
 int main(int argc, char *argv[]) {
     
     int np, rank;
-    int row, col, local_col;
+    int row, col, local_row;
+    int *row_to_send, *displs;
     double *matrix, *vet, *vet_prod;
-    double *local_matrix, *local_vet, *local_vet_prod;
+    double *local_matrix, *local_vet_prod;
 
     double T_inizio, T_fine, T_max;
 
+    MPI_Datatype row_type;
 
-    /* Inizializzazione dell'ambiente MPI */
     MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &np);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     if (rank == 0) {
         /* Ottenimento del numero di righe e colonne*/
@@ -50,46 +46,56 @@ int main(int argc, char *argv[]) {
             vet[i] = ((double)rand() * 10 / (double)RAND_MAX) - 5;
         }
 
-        /* Calcolo numero di colonne per ogni processore */
-        local_col = col / np;
+        /* Calcolo ed invio del numero di righe locali ad ogni processore */
+        row_to_send = (int*)malloc(np * sizeof(int));
+        displs = (int*)malloc(np * sizeof(int));
+        for (int i = 0; i < np; i++) {
+            row_to_send[i] = (row % np) > i ? (row / np) + 1 : (row / np);
+            displs[i] = (i==0) ? 0 : displs[i-1] + row_to_send[i-1];
+
+            MPI_Send(&row_to_send[i], 1, MPI_INT, i, i, MPI_COMM_WORLD);
+        }
     }
-    /* Invio in broadcast del numero di righe, colonne e colonne locali */
-    MPI_Bcast(&row, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    /* Ogni processore riceve il numero di righe locali */
+    MPI_Recv(&local_row, 1, MPI_INT, 0, rank, MPI_COMM_WORLD, NULL);
+    /* Invio in broadcast del numero colonne */
     MPI_Bcast(&col, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&local_col, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     /* Allocazione strutture locali ad ogni processore */
-    local_matrix = (double*)malloc(row * local_col * sizeof(double));
-    local_vet = (double*)malloc(local_col * sizeof(double));
-    local_vet_prod = (double*)malloc(row * sizeof(double));
+    local_matrix = (double*)malloc(local_row * col * sizeof(double));
+    local_vet_prod = (double*)malloc(local_row * sizeof(double));
+    if (rank != 0) vet = (double*)malloc(col * sizeof(double));
 
-    /* Suddivisione per colonne delle matrice */
-    for (int i = 0; i < row; i++) {
-        MPI_Scatter(&matrix[i*col], local_col, MPI_DOUBLE, &local_matrix[i*local_col], local_col, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    }
-    /* Suddivisione del vettore per righe */
-    MPI_Scatter(vet, local_col, MPI_DOUBLE, local_vet, local_col, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    /* Definiamo il tipo riga */
+    MPI_Type_vector(1, col, 1, MPI_DOUBLE, &row_type);
+    MPI_Type_commit(&row_type);
+
+    /* Suddivisione della matrice in blocchi di righe */
+    MPI_Scatterv(matrix, row_to_send, displs, row_type, local_matrix, local_row, row_type, 0, MPI_COMM_WORLD);
+
+    /* Invio in brodcast del vettore */
+    MPI_Bcast(vet, col, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
     /* Sincronizzazione dei processori e calcolo tempo di inizio */
     MPI_Barrier(MPI_COMM_WORLD);
 	T_inizio = MPI_Wtime();
 
     /* Prodotto matrice-vettore locale */
-    for (int i = 0; i < row; i++) {
+    for (int i = 0; i < local_row; i++) {
         local_vet_prod[i] = 0;
-        for (int j = 0; j < local_col; j++) {
-            local_vet_prod[i] += local_matrix[i*local_col+j] * local_vet[j];
+        for (int j = 0; j < col; j++) {
+            local_vet_prod[i] += local_matrix[i*col+j] * vet[j];
         }
     }
 
-    /* Riduzione con somma dei vettori prodotto locali */
-    MPI_Reduce(local_vet_prod, vet_prod, row, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    /* Il processore master raccoglie i risultati parziali */
+    MPI_Gatherv(local_vet_prod, local_row, MPI_DOUBLE, vet_prod, row_to_send, displs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-    /* Sincronizzazione dei processori e calcolo tempo di fine */
+    /* Calcolo tempo di fine */
     MPI_Barrier(MPI_COMM_WORLD);
-	T_fine = MPI_Wtime() - T_inizio;
+	T_fine=MPI_Wtime()-T_inizio;
 
-    /* Calcolo del tempo totale di esecuzione */
+    /* Calcolo del tempo totale di esecuzione*/
 	MPI_Reduce(&T_fine,&T_max,1,MPI_DOUBLE,MPI_MAX,0,MPI_COMM_WORLD);
 
     /* Il processore root stampa i risultati */
@@ -124,12 +130,13 @@ int main(int argc, char *argv[]) {
     /* free della memoria */
     if (rank == 0) {
         free(matrix);
-        free(vet);
         free(vet_prod);
+        free(row_to_send);
+        free(displs);
     }
-    free(local_vet);
+    free(vet);
     free(local_matrix);
     free(local_vet_prod);
-
+    
     return 0;
 }

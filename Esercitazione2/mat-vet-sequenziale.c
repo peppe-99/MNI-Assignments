@@ -71,8 +71,12 @@ int main(int argc, char *argv[]) {
             printf("%f\n", vet_prod[i]);
         }
     }
-
     printf("\nTempo di esecuzione sequenziale: %f sec\n", tempo);
+
+    /* free della memoria */
+    free(matrix);
+    free(vet);
+    free(vet_prod);
 
     return 0;
 }

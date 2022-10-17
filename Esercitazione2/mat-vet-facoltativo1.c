@@ -126,6 +126,7 @@ int main(int argc, char *argv[]) {
 
     MPI_Finalize();
 
+    /* free della memoria */
     if (rank == 0) {
         free(matrix);
         free(vet);
