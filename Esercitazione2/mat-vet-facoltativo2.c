@@ -1,3 +1,10 @@
+/**
+ *  Studente: Giuseppe Cardaropoli
+ *  Matricola: 0522501310
+ *  Algoritmo: prodotto matrice-vettore parallelo
+ *  Strategia: divisione della matrice in blocchi di righe
+ *  Variante: suddivisione mediante MPI_Scatterv() con MPI_Type_vector() e MPI_Type_commit()
+ */
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>

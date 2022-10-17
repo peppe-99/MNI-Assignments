@@ -1,3 +1,10 @@
+/**
+ *  Studente: Giuseppe Cardaropoli
+ *  Matricola: 0522501310
+ *  Algoritmo: prodotto matrice-vettore parallelo
+ *  Strategia: divisione della matrice in blocchi di righe
+ *  Variante: le dimensioni della matrice non devono essere multiple del numero di processori
+ */
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>

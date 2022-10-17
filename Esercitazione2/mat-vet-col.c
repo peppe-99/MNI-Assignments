@@ -1,8 +1,9 @@
 /**
- *  Algoritmo parallelo per il prodotto matrice-vettore
- *  strategia: blocchi di colonne
-*/
-
+ *  Studente: Giuseppe Cardaropoli
+ *  Matricola: 0522501310
+ *  Algoritmo: prodotto matrice-vettore parallelo
+ *  Strategia: divisione della matrice in blocchi di righe
+ */
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>

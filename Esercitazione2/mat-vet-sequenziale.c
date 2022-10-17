@@ -1,3 +1,8 @@
+/**
+ *  Studente: Giuseppe Cardaropoli
+ *  Matricola: 0522501310
+ *  Algoritmo: prodotto matrice-vettore sequenziale
+ */
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
