@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
     int np, rank;
     int row, col, local_row;
     int *row_to_send, *displs;
-    double *matrix, *vet, *vet_prod;
+    double *matrix, *vet, *vet_prod, *oracolo;
     double *local_matrix, *local_vet_prod;
 
     double T_inizio, T_fine, T_max;
@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
         matrix = (double*)malloc(row * col * sizeof(double));
         vet = (double*)malloc(col * sizeof(double));
         vet_prod = (double*)malloc(row * sizeof(double));
+        oracolo = (double*)malloc(row * sizeof(double));
 
         /* Generazione pseudocasuale di matrice e vettore */
         srand(time(NULL));
@@ -51,6 +52,14 @@ int main(int argc, char *argv[]) {
 
         for (int i = 0; i < col; i++) {
             vet[i] = ((double)rand() * 10 / (double)RAND_MAX) - 5;
+        }
+
+        /* Calcolo dell'oracolo */
+        for (int i = 0; i < row; i++) {
+            oracolo[i] = 0;
+            for (int j = 0; j < col; j++) {
+                oracolo[i] += matrix[i*col+j] * vet[j];
+            }
         }
 
         /* Calcolo ed invio del numero di righe locali ad ogni processore */
@@ -124,6 +133,11 @@ int main(int argc, char *argv[]) {
             printf("\nVettore Prodotto:\n");
             for (int i = 0; i < row; i++) {
                 printf("%f\n", vet_prod[i]);
+            }
+
+            printf("\nOracolo:\n");
+            for (int i = 0; i < row; i++) {
+                printf("%f\n", oracolo[i]);
             }
         }
         printf("\nProcessori: %d\n", np);
