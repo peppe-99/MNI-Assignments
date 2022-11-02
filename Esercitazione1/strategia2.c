@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
     int dim, dim_locale, passi=0, p;
     int *displs, *send_counts, *potenze;
     float *elementi, *elementi_locali;
-    float somma_locale=0.0, oracolo=0.0, somma_parziale;
+    float somma_locale=0.0, oracolo=0.0, somma_parziale=0.0;
     double inizio, fine_locale, fine;
 
     /* Inizializzazione ambiente MPI */
