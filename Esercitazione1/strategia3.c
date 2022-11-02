@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
     int dim, dim_locale, passi=0, p, comunicate_with;
     int *displs, *send_counts, *potenze;
     float *elementi, *elementi_locali;
-    float somma_locale=0.0, oracolo=0.0, somma_parziale;
+    float somma_locale=0.0, oracolo=0.0, somma_parziale=0.0;
     double inizio, fine_locale, fine;
 
     /* Inizializzazione ambiente MPI */
@@ -33,7 +33,6 @@ int main(int argc, char **argv) {
             elementi[i] =  ((float)rand() * 10 / (float)RAND_MAX) - 5;
             oracolo += elementi[i];
         }
-        printf("\nOracolo: %f\n", oracolo);
     }
 
     /* Invio in brodcast del numero di elementi da sommare */
@@ -98,8 +97,16 @@ int main(int argc, char **argv) {
     /* Calcolo tempo totale di esecuzione */
     MPI_Reduce(&fine_locale, &fine, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
 
-    printf("Somma locale al processore P%d: %f\n", rank, somma_locale);
+    printf("\nSomma locale al processore P%d: %f\n", rank, somma_locale);
+    
     if (rank == 0) {
+        if (dim <= 10) {
+            printf("\nNumeri: ");
+            for (int i = 0; i < dim; i++) {
+                printf("%f ", elementi[i]);
+            }
+        }
+        printf("\nOracolo: %f\n", oracolo);
         printf("\nTempo totale: %lf sec\n", fine);
     }
 

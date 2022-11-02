@@ -91,7 +91,13 @@ int main(int argc, char **argv) {
     MPI_Reduce(&fine_locale, &fine, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
     
     if (rank == 0) {
-        printf("\nSomma parallela: %f\n", somma_locale);
+        if (dim <= 10) {
+            printf("\nNumeri: ");
+            for (int i = 0; i < dim; i++) {
+                printf("%f ", elementi[i]);
+            }
+        }
+        printf("\n\nSomma parallela: %f\n", somma_locale);
         printf("\nTempo locale P0: %lf sec\n", fine_locale);
         printf("\nTempo totale: %lf sec\n", fine);
     }
