@@ -106,7 +106,7 @@ int main (void) {
             printf("\n");
         }
     }
-    printf("\nTempo di esecuzione parallelo: %fs\n", elapsed_time/1000);
+    printf("\nTempo di esecuzione parallelo (GPU): %fs\n", elapsed_time/1000);
 
     /* free della memoria */
     free(matrix_host);
