@@ -65,7 +65,7 @@ int main (void) {
     cudaMemcpy(read_matrix_dev, matrix_host, (row * col) * sizeof(int), cudaMemcpyHostToDevice);
 
     /* Configurazione del Kernel */
-    dim3 blockDim(16,16);
+    dim3 blockDim(8,12);
     dim3 gridDim(
         (col + blockDim.x - 1) / blockDim.x,
         (row + blockDim.y - 1) / blockDim.y
