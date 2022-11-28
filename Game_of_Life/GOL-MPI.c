@@ -100,12 +100,14 @@ int main(int argc, char **argv) {
         }
 
         /* stampa matrice generazione iniziale */
-        printf("Generazione Iniziale:\n");
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                (matrix[i * cols + j] == 1) ? printf(LIVE) : printf(DEATH);
+        if (rows <= 10 && cols <= 10) {
+            printf("Generazione Iniziale:\n");
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    (matrix[i * cols + j] == 1) ? printf(LIVE) : printf(DEATH);
+                }
+                printf("\n");
             }
-            printf("\n");
         }
     }
 
