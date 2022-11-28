@@ -4,7 +4,7 @@
 
 #define SEED 28
 
-/* ASCII codes */
+/* Codici ASCII */
 #define LIVE "\xF0\x9F\x91\xBE"
 #define DEATH "\xF0\x9F\x94\xB2"
 
@@ -14,22 +14,23 @@ void swap(int **current_matrix, int **new_matrix);
 int neighbors_alive(int i, int j, int rows, int cols, int *matrix);
 
 int main(void) {
-    int row, col;
-    int rounds, cell_alive;
+
+    /* variabili utilizzate */
+    int row, col, generations, cell_alive;
     int *read_matrix, *write_matrix;
     float tempo;
 
-    /* Input: dimensioni matrice e numero di round */
+    /* Input: dimensioni matrice e numero di generazioni */
     printf("Inserire dimensioni griglia: ");
     scanf("%d %d", &row, &col);
     printf("Inserire numero di round: ");
-    scanf("%d", &rounds);
+    scanf("%d", &generations);
 
     /* Allocazione delle strutture dati */
     read_matrix = (int*)malloc(row * col * sizeof(int));
     write_matrix = (int*)malloc(row * col * sizeof(int));
 
-    /* Inizializzazion pseudocasuale della matrice */
+    /* Inizializzazion pseudocasuale della matrice (generazione iniziale) */
     srand(SEED);
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
@@ -48,18 +49,17 @@ int main(void) {
         }
     }
 
-    /* Calcolo tempo di inizio */
-    clock_t start = clock();
+    clock_t start = clock(); // tempo di inizio
     
-    /* Calcolo delle generazioni */
-    for (int round = 0; round < rounds; round++) {
+    /* Simulazione delle generazioni */
+    for (int round = 0; round < generations; round++) {
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
 
                 /* Calcolo celle vicine vive */
                 cell_alive = neighbors_alive(i, j, row, col, read_matrix);
 
-                /* Aggiornamento della matrice */
+                /* Applicazione regole del gioco */
                 if (read_matrix[i * col + j] == 1 && (cell_alive == 2 || cell_alive == 3)) {
                     write_matrix[i * col + j] = 1;
                 }
@@ -69,18 +69,18 @@ int main(void) {
                 else write_matrix[i * col + j] = 0;
             }
         }
-        /* Swap matrici lettura e scrittura */
+        /* swap matrici lettura e scrittura */
         swap(&read_matrix, &write_matrix);
     }
 
-    /* Calcolo tempo di fine */
-    clock_t end = clock();
+    clock_t end = clock(); // tempo di fine
 
+    /* Calcolo tempo di esecuzione */
     tempo = (float)(end - start) / CLOCKS_PER_SEC;    
 
     /* Stampa risultati */
     if (row <= 10 && col <= 10) {
-        printf("\nGenerazione %d:\n", rounds);
+        printf("\nGenerazione %d:\n", generations);
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
                 (read_matrix[i * col + j] == 1) ? printf(LIVE) : printf(DEATH);
