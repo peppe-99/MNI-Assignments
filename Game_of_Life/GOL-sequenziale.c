@@ -10,6 +10,7 @@
 
 /* Funzione per lo swap delle matrici di lettura e scrittura */
 void swap(int **current_matrix, int **new_matrix);
+
 /* Funzione per il calcolo dei vicini vivi */
 int neighbors_alive(int i, int j, int rows, int cols, int *matrix);
 
