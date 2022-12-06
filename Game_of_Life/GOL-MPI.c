@@ -92,7 +92,8 @@ int main(int argc, char **argv) {
 
     /* Il master genera la matrice di partenza con la generazione iniziale */
     if (rank == 0) {
-        srand(SEED);
+	//srand(SEED);
+        srand(time(NULL));
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 matrix[i * cols + j] = rand() % 2;
