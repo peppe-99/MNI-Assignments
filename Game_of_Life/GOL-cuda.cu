@@ -39,7 +39,8 @@ int main (void) {
     matrix_host = (int*) malloc(row * col * sizeof(int));
 
     /* Inizializzazione pseudocasuale delle matrice (generazione iniziale) */
-    srand(SEED);
+	//srand(SEED);
+    srand(time(NULL));
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
             matrix_host[i * col + j] = rand() % 2; // 0 oppure 1
