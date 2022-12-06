@@ -32,7 +32,8 @@ int main(void) {
     write_matrix = (int*)malloc(row * col * sizeof(int));
 
     /* Inizializzazion pseudocasuale della matrice (generazione iniziale) */
-    srand(SEED);
+	//srand(SEED);
+    srand(time(NULL));
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
             read_matrix[i * col + j] = rand() % 2; // 0 oppure 1
