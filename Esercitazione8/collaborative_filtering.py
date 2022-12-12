@@ -117,7 +117,7 @@ def user_recommendations(person, function):
 		print(f"\n{other} Similarity: {round(sim,2)}")
 		for item in dataset[other]:
 			if item not in dataset[person]:
-				print(f"Film: {item} - Voto: {dataset[other][item]} - Film Similarity: {round(dataset[other][item] * sim, 2)}")
+				print(f"Film: {item} - Voto: {round(dataset[other][item],2)} - Film Similarity: {round(dataset[other][item] * sim, 2)}")
 
 	# Create the normalized list
 	rankings = [(total/simSums[item],item) for item,total in totals.items()]
@@ -197,6 +197,7 @@ if __name__ == "__main__" :
 	print("\nMisura di Similarità: Distanza Euclidea")
 	print(f"\nFilm consigliati per Toby: {user_recommendations('Toby','euclidea')}")
 
+	print("\nMisura di Similarità: Correlazione di Pearson con Approssimaizone")
 	print(f"\nFilm consigliati a Toby: {user_recommendations('Toby','pearson_with_approximation')}")
 
 	
