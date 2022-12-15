@@ -32,9 +32,11 @@ for k in range(1, S.shape[0]):
 	sum2 = 0
 	Xapprox = U[:,:k] @ S[0:k,:k] @ VT[:k,:]
 	
+	# somma dei primi k valori singolari
 	for i in range(0,k):
 		sum1 += S[i][i]
 
+	# somma di tutti i valori singolari
 	for i in range(0, S.shape[0]):
 		sum2 += S[i][i]
 
