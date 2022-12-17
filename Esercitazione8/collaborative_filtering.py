@@ -170,7 +170,7 @@ def recommendations_approximation(user, product):
 			average_local /= len(dataset[other_user])
 
 			# aggiorno le somme delle simillarità
-			sum_sims_weighted += sim * (dataset[other_user][item] - average_local)
+			sum_sims_weighted += sim * (dataset[other_user][product] - average_local)
 			sum_sims += sim
 
 	approx_vote = average_vote + (sum_sims_weighted / sum_sims)
