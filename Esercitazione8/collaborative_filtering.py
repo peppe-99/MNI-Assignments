@@ -80,9 +80,6 @@ def user_recommendations(person, function):
 	simSums = {}
 	rankings_list = []
 
-	if function == "pearson_with_approximation":
-		recommendations_approximation()
-
 	for other in dataset:
 		# don't compare me to myself
 		if other == person:
@@ -92,8 +89,6 @@ def user_recommendations(person, function):
 		if function == "pearson":
 			sim = pearson_correlation(person, other)
 		elif function == "euclidea":
-			sim = similarity_score(person, other)
-		elif function == "pearson_with_approximation":
 			sim = similarity_score(person, other)
 
 		# ignore scores of zero or lower
@@ -124,6 +119,8 @@ def user_recommendations(person, function):
 	rankings.sort()
 	rankings.reverse()
 
+	print(f"\nRankings: {rankings}")
+
 	# returns the recommended items
 	recommendataions_list = [recommend_item for score,recommend_item in rankings]
 	return recommendataions_list
@@ -144,51 +141,41 @@ def calculateSimilarItems(prefs,n=10):
                 result[item]=scores
         return result
 
-def recommendations_approximation():
+def recommendations_approximation(user, product):
 
-	# Per ogni utente k
-	for user in dataset:
-		average_vote = 0.0
+	# Stimiamo la valutazione di 'user' per 'product'
+	average_vote = 0.0
+	sum_sims = 0.0
+	sum_sims_weighted = 0.0
+
+	# Calcolo la media delle valutazioni di 'user'
+	for item in dataset[user]:
+		average_vote += dataset[user][item]
+	average_vote /= len(dataset[user])
+
+	# Per ogni alto utente diverso e che ha valutato 'product'
+	for other_user in dataset:
 		average_local = 0.0
-		sum_sims = 0.0
-		sum_sims_weighted = 0.0
-		
-		print(f"\nUtente: {user}")
 
-		# Calcolo il suo voto medio
-		for item in dataset[user]:
-			average_vote += dataset[user][item]
-		average_vote /= len(dataset[user])
+		if other_user == user:
+			continue
 
-		print(f"Voto medio: {round(average_vote,2)}")
-		
-		# Per ogni film i che ha votato l'utente k
-		for item in dataset[user]:
-			for other in dataset:
-				
-				# saltiamo l'utente stesso
-				if other == user:
-					continue
+		if product in dataset[other_user]:
+			# ne calcolo la similarità
+			sim = pearson_correlation(user, other_user)
 
-				# consideriamo solo gli altri utenti che hanno votato lo stesso film
-				if item in dataset[other]:
+			# calcolo la media di questo utente
+			for other_item in dataset[other_user]:
+				average_local += dataset[other_user][other_item]
+			average_local /= len(dataset[other_user])
 
-					# ne calcoliaml la similarità
-					sim = pearson_correlation(user, other)
-					
-					# calcolo la media di questo utente
-					for other_item in dataset[other]:
-						average_local += dataset[other][other_item]
-					average_local /= len(dataset[other])
+			# aggiorno le somme delle simillarità
+			sum_sims_weighted += sim * (dataset[other_user][item] - average_local)
+			sum_sims += sim
 
-					# aggiorne le somme delle simillarità
-					sum_sims_weighted += sim * (dataset[other][other_item] - average_local)
-					sum_sims += sim
+	approx_vote = average_vote + (sum_sims_weighted / sum_sims)
 
-			# aggiorno la raccomandazione dell'utente k sul prodotto i
-			dataset[user][item] = average_vote + (sum_sims_weighted / sum_sims)
-
-			print(f"Raccomandazione per il prodotto {item}: {round(dataset[user][item],2)}")
+	return {product: approx_vote}
 
 if __name__ == "__main__" :
 	print("\nMisura di Similarità: Correlazione di Pearson")
@@ -197,9 +184,7 @@ if __name__ == "__main__" :
 	print("\nMisura di Similarità: Distanza Euclidea")
 	print(f"\nFilm consigliati per Toby: {user_recommendations('Toby','euclidea')}")
 
-	print("\nMisura di Similarità: Correlazione di Pearson con Approssimaizone")
-	print(f"\nFilm consigliati a Toby: {user_recommendations('Toby','pearson_with_approximation')}")
-
-	
-
-
+	print("\nStime di Valutazioni:")
+	for item in ['The Night Listener', 'Lady in the Water', 'Just My Luck']:
+		print(f"{recommendations_approximation('Toby', item)}")
+		
