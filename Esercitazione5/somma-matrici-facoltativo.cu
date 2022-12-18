@@ -51,8 +51,8 @@ int main(void) {
     /* Configurazione del Kernel */
     dim3 blockDim(8, 8); // (8, 8) ottimale
     dim3 gridDim(
-        (m + blockDim.x - 1) / blockDim.x,
-        (n + blockDim.y - 1) / blockDim.y
+        (n + blockDim.x - 1) / blockDim.x,
+        (m + blockDim.y - 1) / blockDim.y
     );
     printf("blockDim = (%d,%d)\n", blockDim.x, blockDim.y);
     printf("gridDim = (%d,%d)\n", gridDim.x, gridDim.y);
